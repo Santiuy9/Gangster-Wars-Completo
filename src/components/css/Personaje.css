@@ -1,0 +1,43 @@
+.Personaje-container {
+    width: 90vw;
+    display: flex;
+    justify-content: space-around;
+    color: gray;
+}
+
+.Character {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.character-slots {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 245px;
+    min-width: 245px;
+}
+
+.inventory-slots {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 245px;
+    min-width: 415px;
+}
+
+
+.Inventory {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.slot {
+    width: 100px;
+    height: 100px;
+    background-color: rgba(0, 0, 0, 0.7);
+    border: 1px solid whitesmoke;
+    margin: 10px;
+}
