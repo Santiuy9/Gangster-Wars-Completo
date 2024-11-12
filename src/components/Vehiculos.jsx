@@ -20,7 +20,7 @@ export default function Vehiculos() {
                 proBarPercentage="70"
             />
             <ItemCard
-                title="Volskwagen GOLF"
+                title="Bentley Continental GT"
                 imageSrc={Bentley}
                 description="Auto con muchas comodidades"
                 price="990000"

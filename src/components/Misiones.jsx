@@ -26,23 +26,50 @@ export default function Misiones() {
                         const docRef = doc(db, 'Players', user.uid);
                         const docSnap = await getDoc(docRef);
                         if (docSnap.exists()) {
-                            setPlayerInfo(docSnap.data());
+                            const playerData = docSnap.data();
+                            setPlayerInfo(playerData);
+
+                            const { missionStatus } = playerData;
+                            if (missionStatus?.isActive) {
+                                const endTime = new Date(missionStatus.endTime).getTime();
+                                const currentTime = Date.now();
+                                const timeLeft = endTime - currentTime;
+
+                                if (timeLeft > 0) {
+                                    setMissionInProgress(true);
+                                    setTimeout(() => handleMissionEnd(), timeLeft);
+                                } else {
+                                    handleMissionEnd();
+                                }
+                            }
                         } else {
-                            console.log("No such document!");
+                            console.log("No existe el documento del jugador.");
                         }
                     } catch (error) {
-                        console.error("Error fetching player data:", error);
+                        console.error("Error al obtener los datos del jugador:", error);
                     }
                 };
-    
                 fetchPlayerData();
-            } else {
-                console.log("User is not authenticated");
             }
         });
-    
+
         return () => unsubscribe();
     }, []);
+
+    const handleMissionEnd = async () => {
+        try {
+            const userDocRef = doc(db, 'Players', auth.currentUser.uid);
+            await updateDoc(userDocRef, {
+                missionStatus: { isActive: false, missionId: null, endTime: null }
+            });
+            setMissionInProgress(false);
+            alert("La misión ha terminado.");
+        } catch (error) {
+            console.error("Error al finalizar la misión:", error);
+        }
+    };
+    
+    
     
 
     const handleStartMision = () => {
@@ -70,8 +97,8 @@ export default function Misiones() {
             description: "Roba a una persona en la calle",
             moneyReward: "$50 - $250",
             xpReward: "5 - 25",
-            difficulty: 15,
-            duration: 1.5 * 60,
+            difficulty: 5,
+            duration: 30,
             costEnergy: 10,
         },
         {
@@ -81,8 +108,8 @@ export default function Misiones() {
             description: "Irrumpe dentro de una casa y apropiate objetos de valor",
             moneyReward: "$1500 - $2500",
             xpReward: "150 - 250",
-            difficulty: 35,
-            duration: 15 * 60,
+            difficulty: 5,
+            duration: 10,
             costEnergy: 35,
         },
         {
@@ -92,8 +119,8 @@ export default function Misiones() {
             description: "Entra al Banco y roba la bodega de Oro",
             moneyReward: "$30000 - $50000",
             xpReward: "750 - 1000",
-            difficulty: 85,
-            duration: 4 * 3600,
+            difficulty: 5,
+            duration: 15,
             costEnergy: 60,
         },
     ];

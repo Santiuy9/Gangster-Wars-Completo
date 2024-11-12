@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import DifficultyBar from "./DifficultyBar";
 import CountdownBar from "./CountdownBar";
 import { doc, updateDoc, getDoc} from 'firebase/firestore';
-import { db } from '../firebase';
+import { auth, db } from '../firebase';
 import './css/MissionCard.css';
 
 export default function MissionCard({ 
@@ -23,23 +23,37 @@ export default function MissionCard({
     const [missionStarted, setMissionStarted] = useState(false);
 
     const startMission = async () => {
-        console.log('Mision Iniciada')
+        if (!auth.currentUser) {
+            console.error("No hay usuario autenticado");
+            return;
+        }
+
+        console.log('Misión Iniciada');
         try {
             const userDocRef = doc(db, 'Players', playerInfo.uid);
-
             const userDocSnap = await getDoc(userDocRef);
+    
             if (userDocSnap.exists()) {
                 const userData = userDocSnap.data();
                 const currentEnergy = userData.energia;
-
+    
                 if (currentEnergy >= energiaCost) {
                     const nuevaEnergia = currentEnergy - energiaCost;
-
-                    await updateDoc(userDocRef, { energia: nuevaEnergia });
-
+                    
+                    // Guardar la hora exacta de finalización
+                    const endTime = new Date(Date.now() + duration * 1000); // Ajusta `duration` a segundos o lo que necesites
+    
+                    await updateDoc(userDocRef, { 
+                        energia: nuevaEnergia,
+                        missionStatus: {
+                            isActive: true,
+                            missionId: title,
+                            endTime: endTime.toISOString(),  // Guardar en formato ISO para precisión
+                        }
+                    });
+    
                     setMissionStarted(true);
                     onStartMission();
-
                     setPlayerInfo(prev => ({ ...prev, energia: nuevaEnergia }));
                 } else {
                     alert("No tienes suficiente energía para esta misión.");
@@ -51,44 +65,35 @@ export default function MissionCard({
             console.error("Error al iniciar la misión:", error);
         }
     };
+    
+    
 
     const handleMissionEnd = async () => {
-        console.log("Llamando handleMissionEnd")
+        const isSuccess = Math.random() > difficulty / 100;
         const successMessage = "¡La misión fue exitosa!";
         const failureMessage = "La misión falló.";
-        
-        const isSuccess = Math.random() > difficulty / 100;
-    
-        let earnedMoney = 0;
     
         if (isSuccess) {
             const [minMoney, maxMoney] = moneyReward.replace(/\$/g, '').split(' - ').map(Number);
-            // console.log([minMoney, maxMoney])
-            earnedMoney = Math.floor(Math.random() * (maxMoney - minMoney + 1)) + minMoney;
-            console.log(earnedMoney)
-            // alert(`Ganaste $${earnedMoney}!`);
+            const earnedMoney = Math.floor(Math.random() * (maxMoney - minMoney + 1)) + minMoney;
     
             try {
                 const userDocRef = doc(db, 'Players', playerInfo.uid);
-                const updatedMoney = playerInfo.dinero + earnedMoney;
-    
-                await updateDoc(userDocRef, { dinero: updatedMoney });
-    
-                setPlayerInfo(prevInfo => ({
-                    ...prevInfo,
-                    dinero: updatedMoney
-                }));
-    
+                await updateDoc(userDocRef, { 
+                    dinero: playerInfo.dinero + earnedMoney, 
+                    missionStatus: { isActive: false, missionId: null, endTime: null }
+                });
+                setPlayerInfo(prevInfo => ({ ...prevInfo, dinero: playerInfo.dinero + earnedMoney }));
             } catch (error) {
                 console.error("Error al actualizar el dinero del jugador:", error);
             }
-            // alert(`Ganaste $${earnedMoney}!`);
         }
-    
     
         onEndMission(isSuccess ? successMessage : failureMessage);
         setMissionStarted(false);
     };
+    
+    
     
 
     return (

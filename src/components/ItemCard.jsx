@@ -79,7 +79,12 @@ export default function ItemCard({
             <div className="ItemDescription">
                 <h2>{title}</h2>
                 <p>{description}</p>
-                <ProgressBar name={proBarName} TXTcolor={proBarTxtColor} BGcolor={proBarBgColor} fillPercentage={proBarPercentage} />
+                <ProgressBar 
+                    name={proBarName} 
+                    TXTcolor={proBarTxtColor} 
+                    BGcolor={proBarBgColor} 
+                    fillPercentage={proBarPercentage} 
+                />
                 {renderIcon()}
             </div>
             <SlideButton

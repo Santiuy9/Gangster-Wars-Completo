@@ -5,6 +5,13 @@
     color: gray;
 }
 
+.Character-Items {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
 .Character {
     display: flex;
     flex-direction: column;
@@ -35,9 +42,26 @@
 }
 
 .slot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
     width: 100px;
     height: 100px;
     background-color: rgba(0, 0, 0, 0.7);
     border: 1px solid whitesmoke;
     margin: 10px;
+}
+
+.slot p {
+    position: relative;
+    color: white;
+    text-align: center;
+}
+
+.item-image {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    z-index: -1;
 }
